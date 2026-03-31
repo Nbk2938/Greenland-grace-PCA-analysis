@@ -4,16 +4,24 @@ This project analyzes how Greenland's ice-mass anomalies from GRACE relate to re
 
 ## Getting the Repository
 
-If you download a ZIP archive everything under `Data/` is already included. When cloning from GitHub you must pull the NetCDF datasets via Git LFS because they exceed the default blob size limit:
+If you download a ZIP archive everything under `Data/` is already included. When cloning from GitHub you must pull the NetCDF datasets via Git LFS because they exceed the default blob size limit. Use whichever remote style you prefer:
 
 ```bash
 git lfs install                     # one-time per machine
-git clone https://github.com/<org>/<repo>.git
-cd <repo>
+git clone git@github.com:Nbk2938/Greenland-grace-PCA-analysis.git
+cd Greenland-grace-PCA-analysis
 git lfs pull                        # ensures the .nc assets are fetched
 ```
 
-Replace `<org>/<repo>` with the actual repository path. If LFS is not installed the `.nc` files will appear as tiny pointer files and the analysis script will raise "file not found" errors.
+HTTPS alternative:
+
+```bash
+git clone https://github.com/Nbk2938/Greenland-grace-PCA-analysis.git
+cd Greenland-grace-PCA-analysis
+git lfs pull
+```
+
+If LFS is not installed the `.nc` files will appear as tiny pointer files and the analysis script will raise "file not found" errors.
 
 ## Requirements
 
