@@ -9,8 +9,8 @@
 !grace_temp_covariability.py
 
 # Keep datasets under Data/
-#!Data/
-#!Data/**
+!Data/
+!Data/**
 
 # Keep this file
 !.gitignore
