@@ -1,0 +1,16 @@
+# Ignore the virtual environment outright
+.venv/
+
+# Ignore everything else by default
+*
+
+# Keep project documentation and main analysis script
+!README.md
+!grace_temp_covariability.py
+
+# Keep datasets under Data/
+#!Data/
+#!Data/**
+
+# Keep this file
+!.gitignore
