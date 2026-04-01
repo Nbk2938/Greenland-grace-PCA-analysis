@@ -957,23 +957,46 @@ def plot_regional_scatter(
     n = len(regions)
     if n == 0:
         return
-    ncols = min(3, n)
-    nrows = int(np.ceil(n / ncols))
-    fig, axes = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4 * nrows), squeeze=False)
-    for idx, region in enumerate(regions):
-        ax = axes[idx // ncols, idx % ncols]
+    # Force a symmetric 3-over-2 layout when five regions are present.
+    if n == 5:
+        fig, axes = plt.subplots(2, 3, figsize=(15, 8), squeeze=False)
+        slot_map = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2)]
+    else:
+        ncols = min(3, n)
+        nrows = int(np.ceil(n / ncols))
+        fig, axes = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4 * nrows), squeeze=False)
+        slot_map = [(idx // ncols, idx % ncols) for idx in range(n)]
+
+    used_slots = set()
+    for region, (row_idx, col_idx) in zip(regions, slot_map):
+        used_slots.add((row_idx, col_idx))
+        ax = axes[row_idx, col_idx]
         combined = _align_by_month(grace_series[region], temp_series[region])
+        if combined.empty:
+            ax.set_visible(False)
+            continue
         ax.scatter(
-            combined["temp_degC"], combined["mass_mm"],
+            combined["mass_mm"], combined["temp_degC"],
             alpha=0.5, s=15, edgecolor="k", linewidth=0.3,
         )
-        ax.set_xlabel("Temp anomaly (°C)")
-        ax.set_ylabel("Mass anomaly (mm w.e.)")
+        if combined.shape[0] >= 2 and np.ptp(combined["mass_mm"].values) > 0:
+            # Overlay least-squares trend lines to highlight signal direction.
+            x_vals = combined["mass_mm"].values
+            y_vals = combined["temp_degC"].values
+            slope, intercept = np.polyfit(x_vals, y_vals, 1)
+            x_fit = np.linspace(x_vals.min(), x_vals.max(), 100)
+            y_fit = slope * x_fit + intercept
+            ax.plot(x_fit, y_fit, color="#c43c39", linewidth=1.2)
+        ax.set_xlabel("Mass anomaly (mm w.e.)")
+        ax.set_ylabel("Temp anomaly (°C)")
         ax.set_title(region)
         ax.grid(alpha=0.3)
-    # hide unused axes
-    for idx in range(n, nrows * ncols):
-        axes[idx // ncols, idx % ncols].set_visible(False)
+
+    # Hide any unused subplot slots (e.g., bottom-middle when n == 5).
+    for row_idx in range(axes.shape[0]):
+        for col_idx in range(axes.shape[1]):
+            if (row_idx, col_idx) not in used_slots:
+                axes[row_idx, col_idx].set_visible(False)
     fig.suptitle("Regional mass vs temperature anomalies")
     fig.tight_layout()
     fig.savefig(output_dir / "regional_scatter.png", dpi=300)
